@@ -11,11 +11,13 @@ import { AccessTokenType, JWTPayloadType } from 'src/utils/types';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/loginDto';
+import { Role } from 'src/roles/entitys/role.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -42,9 +44,13 @@ export class AuthService {
   }
 
   public async login(payload: LoginDto) {
-    const user: User | null = await this.userRepo.findOne({
+    const user = await this.userRepo.findOne({
       where: { email: payload.email },
+      relations: {
+        role: true,
+      },
     });
+    console.log(user);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -53,12 +59,11 @@ export class AuthService {
       payload.password,
       user.password,
     );
-    console.log(user);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     const accessToken: AccessTokenType = await this.generateJwt({
       id: user.id,
-      role: user.role,
+      role: user.role.name,
     });
 
     return accessToken;

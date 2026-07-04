@@ -1,8 +1,9 @@
-import { UserType } from 'src/utils/enums';
+import { Role } from 'src/roles/entitys/role.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,9 +22,6 @@ export class User {
   @Column({ type: 'varchar', length: 150, unique: true })
   email!: string;
 
-  @Column({ type: 'enum', enum: UserType, default: UserType.NORMAL_USER })
-  role!: UserType;
-
   @Column()
   //@Exclude()
   password!: string;
@@ -37,4 +35,7 @@ export class User {
     type: 'timestamp',
   })
   updatedAt!: Date;
+
+  @ManyToOne(() => Role, (role) => role.users)
+  role!: Role;
 }
