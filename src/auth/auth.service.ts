@@ -2,10 +2,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from './dto/registerDto';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AccessTokenType, JWTPayloadType } from 'src/utils/types';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/loginDto';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +40,33 @@ export class AuthService {
       throw new BadRequestException('Failed to create user');
     }
   }
+
+  public async login(payload: LoginDto) {
+    const user: User | null = await this.userRepo.findOne({
+      where: { email: payload.email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    const isMatch: boolean = await bcrypt.compare(
+      payload.password,
+      user.password,
+    );
+    console.log(user);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+    const accessToken: AccessTokenType = await this.generateJwt({
+      id: user.id,
+      role: user.role,
+    });
+
+    return accessToken;
+  }
+
+  // public async login(payload: JWTPayloadType): Promise<AccessTokenType> {
+  //   return this.generateJwt(payload);
+  // }
 
   /**
    *

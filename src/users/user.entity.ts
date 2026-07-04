@@ -1,3 +1,4 @@
+import { UserType } from 'src/utils/enums';
 import {
   Column,
   CreateDateColumn,
@@ -19,6 +20,9 @@ export class User {
 
   @Column({ type: 'varchar', length: 150, unique: true })
   email!: string;
+
+  @Column({ type: 'enum', enum: UserType, default: UserType.NORMAL_USER })
+  role!: UserType;
 
   @Column()
   //@Exclude()
