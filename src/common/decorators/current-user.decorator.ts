@@ -4,8 +4,19 @@ import { JWTPayloadType } from 'src/utils/types';
 
 // CurrentUser Parameter Decorator
 export const CurrentUser = createParamDecorator(
-  (data: unknown, context: ExecutionContext): JWTPayloadType => {
-    const request: Request = context.switchToHttp().getRequest();
-    return request[CURRENT_USER_KEY];
+  (
+    data: keyof JWTPayloadType | undefined,
+    context: ExecutionContext,
+  ): JWTPayloadType | JWTPayloadType[keyof JWTPayloadType] | undefined => {
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { [CURRENT_USER_KEY]?: JWTPayloadType }>();
+    const currentUser = request[CURRENT_USER_KEY];
+
+    if (!data) {
+      return currentUser;
+    }
+
+    return currentUser?.[data];
   },
 );

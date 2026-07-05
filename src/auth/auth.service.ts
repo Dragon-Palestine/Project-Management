@@ -1,46 +1,26 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { RegisterDto } from './dto/registerDto';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AccessTokenType, JWTPayloadType } from 'src/utils/types';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/loginDto';
 import { Role } from 'src/roles/entitys/role.entity';
+import { CreateUserDto } from 'src/common/dto/createUserDto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
+    private readonly userService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
-  public async register(payload: RegisterDto): Promise<User> {
-    const userExist = await this.userRepo.findOne({
-      where: { email: payload.email },
-    });
-
-    if (userExist) {
-      throw new BadRequestException('User already exists');
-    }
-
-    try {
-      const hashPassword = await this.generateHashPassword(payload.password);
-      const user: User = this.userRepo.create({
-        ...payload,
-        password: hashPassword,
-      });
-
-      return await this.userRepo.save(user);
-    } catch {
-      throw new BadRequestException('Failed to create user');
-    }
+  public async register(payload: CreateUserDto): Promise<User> {
+    return this.userService.create(payload);
   }
 
   public async login(payload: LoginDto) {
@@ -50,7 +30,6 @@ export class AuthService {
         role: true,
       },
     });
-    console.log(user);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -61,7 +40,7 @@ export class AuthService {
     );
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const accessToken: AccessTokenType = await this.generateJwt({
+    const accessToken = await this.generateToken({
       id: user.id,
       role: user.role.name,
     });
@@ -69,27 +48,9 @@ export class AuthService {
     return accessToken;
   }
 
-  // public async login(payload: JWTPayloadType): Promise<AccessTokenType> {
-  //   return this.generateJwt(payload);
-  // }
-
-  /**
-   *
-   * @param password
-   * @returns hash password
-   */
-  public async generateHashPassword(password: string): Promise<string> {
-    const salt: string = await bcrypt.genSalt(10);
-    const hashPassword: string = await bcrypt.hash(password, salt);
-    return hashPassword;
-  }
-
-  /**
-   * generate jwt
-   * @param payload -> JWTPayloadType
-   * @returns {accessToken} -> Promise<AccessTokenType>
-   */
-  private async generateJwt(payload: JWTPayloadType): Promise<AccessTokenType> {
+  private async generateToken(
+    payload: JWTPayloadType,
+  ): Promise<AccessTokenType> {
     const accessToken = await this.jwtService.signAsync(payload);
     return { accessToken };
   }

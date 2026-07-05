@@ -5,6 +5,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  DeleteDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -35,6 +36,12 @@ export class User {
     type: 'timestamp',
   })
   updatedAt!: Date;
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+    nullable: true,
+  })
+  deletedAt?: Date;
 
   @ManyToOne(() => Role, (role) => role.users)
   role!: Role;
