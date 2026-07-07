@@ -12,10 +12,14 @@ import { UsersService } from './users.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UpdateUserDto } from './dto/updateUserDto';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
 
 @Controller('api/users')
 export class UsersController {
   public constructor(private readonly usersService: UsersService) {}
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermission('users.create')
   @Post('create')
   public async createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);

@@ -5,11 +5,15 @@ import { ClientContactsService } from './client-contacts.service';
 import { ClientContact } from './entities/client-contact.entity';
 import { Client } from 'src/clients/client.entity';
 import { User } from 'src/users/user.entity';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
   controllers: [ClientContactsController],
   providers: [ClientContactsService],
-  imports: [TypeOrmModule.forFeature([ClientContact, Client, User])],
+  imports: [
+    TypeOrmModule.forFeature([ClientContact, Client, User]),
+    RolesModule,
+  ],
   exports: [ClientContactsService],
 })
 export class ClientContactsModule {}
