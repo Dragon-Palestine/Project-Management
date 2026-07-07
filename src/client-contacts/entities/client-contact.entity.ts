@@ -1,5 +1,4 @@
 import { Client } from 'src/clients/client.entity';
-import { User } from 'src/users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -21,12 +20,6 @@ export class ClientContact {
     onDelete: 'CASCADE',
   })
   client!: Client;
-
-  @ManyToOne(() => User, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  user?: User;
 
   @Column({
     type: 'varchar',

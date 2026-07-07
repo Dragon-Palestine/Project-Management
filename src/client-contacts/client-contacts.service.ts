@@ -43,7 +43,6 @@ export class ClientContactsService {
         },
         relations: {
           client: true,
-          user: true,
         },
         order: {
           createdAt: 'DESC',
@@ -54,7 +53,6 @@ export class ClientContactsService {
     return await this.clientContactRepo.find({
       relations: {
         client: true,
-        user: true,
       },
       order: {
         createdAt: 'DESC',
@@ -67,7 +65,6 @@ export class ClientContactsService {
       where: { id },
       relations: {
         client: true,
-        user: true,
       },
     });
 
@@ -141,7 +138,6 @@ export class ClientContactsService {
       throw new NotFoundException('User not found');
     }
 
-    contact.user = user;
     contact.isPortalUser = true;
 
     return await this.clientContactRepo.save(contact);
