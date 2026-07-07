@@ -7,6 +7,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionModule } from './permission/permission.module';
+import { ClientsModule } from './clients/clients.module';
+import { ClientContactsModule } from './client-contacts/client-contacts.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,6 +20,8 @@ import { PermissionModule } from './permission/permission.module';
     AuthModule,
     RolesModule,
     PermissionModule,
+    ClientsModule,
+    ClientContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
